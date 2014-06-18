@@ -1,7 +1,8 @@
 require 'rubygems'
-require 'sinatra'
+require 'bundler/setup'
+Bundler.require(:default, :development)
+
 require 'sinatra/reloader' if development?
-require 'twilio-ruby'
 
 set :server, 'thin'
 set :port, 2424
