@@ -46,7 +46,7 @@ MESSAGE
   end
 
   def format_eta(eta)
-    Time.strptime(eta, settings.BNSF_TRACE_ETA_FORMAT).strftime("%m/%d/%Y at%l:%M%p") unless eta.strip.empty?
+    Time.strptime(eta, settings.BNSF_TRACE_ETA_FORMAT).strftime("%m/%d/%y at%l:%M%p") unless eta.strip.empty?
   end
 
   def twiml_response(message)
