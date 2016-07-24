@@ -11,6 +11,7 @@ set :server, 'thin'
 
 configure do
   set :BNSF_TRACE_URI, ENV['BNSF_TRACE_URI']
+  set :BNSF_TRACE_ETA_FORMAT, "%m/%d/%Y  %H%M".freeze
   set :VALID_CONTAINER_NUMBER_REGEX, /[a-z]{3}u\d{6,}/i
 
   set :client, Redis.new(url: ENV['REDIS_URL'])
@@ -36,10 +37,14 @@ helpers do
 
   def trace_result(container_number, destination, eta)
 <<-MESSAGE
-Container Number: #{container_number}
+Container Number: #{container_number.upcase}
 Destination: #{destination}
-ETA: #{eta}
+ETA: #{format_eta eta}
 MESSAGE
+  end
+
+  def format_eta(eta)
+    Time.strptime(eta, settings.BNSF_TRACE_ETA_FORMAT).strftime("%m/%d/%Y at%l:%M%p")
   end
 
   def twiml_response(message)
