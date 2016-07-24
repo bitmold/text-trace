@@ -22,7 +22,7 @@ helpers do
   def trace(container_number)
     response = @cache.fetch "trace:bnsf:#{container_number}" do
       r = Typhoeus.post([settings.BNSF_TRACE_URI, container_number].join)
-      raise "The trace was not successful (#{container_number})." unless r.success?; r
+      raise "The trace was not successful (#{container_number.upcase})." unless r.success?; r
     end
 
     doc = Nokogiri::HTML(response.body)
@@ -30,7 +30,9 @@ helpers do
     destination = doc.css("span#DestHub").inner_html
     eta = doc.css("span#ETA").inner_html
 
-    raise "The trace did not return a destination (#{container_number})." unless destination
+    unless destination and not destination.empty?
+      raise "The trace did not return a destination (#{container_number.upcase})."
+    end
 
     { destination: destination, eta: eta }
   end
@@ -44,7 +46,7 @@ MESSAGE
   end
 
   def format_eta(eta)
-    Time.strptime(eta, settings.BNSF_TRACE_ETA_FORMAT).strftime("%m/%d/%Y at%l:%M%p")
+    Time.strptime(eta, settings.BNSF_TRACE_ETA_FORMAT).strftime("%m/%d/%Y at%l:%M%p") unless eta.strip.empty?
   end
 
   def twiml_response(message)
