@@ -18,12 +18,15 @@ configure do
 
   set :client, Redis.new(url: ENV['REDIS_URL'])
   set :cache, Proc.new { Cache.wrap(client).tap { |c| c.config.default_ttl = 1800 } }
+  set :user_agent, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36".freeze
+  set :referer, ENV['BNSF_REFERER']
 end
 
 helpers do
   def trace(container_number)
     response = @cache.fetch "trace:bnsf:#{container_number}" do
-      r = Typhoeus.post([settings.BNSF_TRACE_URI, container_number].join)
+      r = Typhoeus.post [settings.BNSF_TRACE_URI, container_number].join,
+        headers: { 'User-Agent' => settings.user_agent, 'Referer' => settings.referer }
       raise "The trace was not successful (#{container_number.upcase})." unless r.success?; r
     end
 
