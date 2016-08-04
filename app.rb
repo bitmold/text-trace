@@ -12,9 +12,9 @@ set :server, 'thin'
 configure do
   set :BNSF_TRACE_URI, ENV['BNSF_TRACE_URI']
   set :BNSF_TRACE_ETA_FORMAT, "%m/%d/%Y  %H%M".freeze
-  set :VALID_CONTAINER_NUMBER_REGEX, /[a-z]{3}u\d{6,}/i
+  set :VALID_CONTAINER_NUMBER_REGEX, /^[a-z]{4}\d{6,}/i
 
-  set :invalid_container_number_message, "Invalid container number: The container number should have format XXXU1234567".freeze
+  set :invalid_container_number_message, "Invalid container number: The container number should have format XXXX1234567".freeze
 
   set :client, Redis.new(url: ENV['REDIS_URL'])
   set :cache, Proc.new { Cache.wrap(client).tap { |c| c.config.default_ttl = 1800 } }
