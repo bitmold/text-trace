@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
+ruby '2.4.1'
+
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'thin'
@@ -13,4 +15,5 @@ gem 'nokogiri'
 group :development do
   gem 'dotenv'
   gem 'pry'
+  gem 'fakeredis'
 end

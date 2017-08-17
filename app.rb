@@ -16,7 +16,7 @@ configure do
 
   set :invalid_container_number_message, "Invalid container number: The container number should have format XXXX1234567".freeze
 
-  set :client, Redis.new(url: ENV['REDIS_URL'])
+  set :client, production? ? Redis.new(url: ENV['REDIS_URL']) : Redis.new
   set :cache, Proc.new { Cache.wrap(client).tap { |c| c.config.default_ttl = 1800 } }
   set :user_agent, "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36".freeze
   set :referer, ENV['BNSF_REFERER']
@@ -55,7 +55,7 @@ MESSAGE
   end
 
   def twiml_response(message)
-    Twilio::TwiML::Response.new { |r| r.Message message }.text
+    Twilio::TwiML::MessagingResponse.new.message(body: message).to_s
   end
 end
 
@@ -64,7 +64,7 @@ before do
 end
 
 post '/trace' do
-  query = params[:Body]
+  query = params[:Body].to_s.gsub(/\s+/,'')
   valid_container_number_regex = settings.VALID_CONTAINER_NUMBER_REGEX
 
   if match = valid_container_number_regex.match(query)
@@ -75,9 +75,9 @@ post '/trace' do
   begin
     result = trace(container_number)
   rescue => exception
-    return twiml_response exception.message
+    return twiml_response(exception.message)
   end
 
   message = trace_result(container_number, result[:destination], result[:eta])
-  twiml_response message
+  twiml_response(message)
 end
