@@ -12,7 +12,7 @@ set :server, 'thin'
 configure do
   set :BNSF_TRACE_URI, ENV['BNSF_TRACE_URI']
   set :BNSF_TRACE_ETA_FORMAT, "%m/%d/%Y  %H%M".freeze
-  set :VALID_CONTAINER_NUMBER_REGEX, /^[a-z]{4}\d{6,}/i
+  set :VALID_CONTAINER_NUMBER_REGEX, /^[a-z]{3}[ujz]\d{6,7}/i
 
   set :invalid_container_number_message, "Invalid container number: The container number should have format XXXX1234567".freeze
 
@@ -69,6 +69,9 @@ post '/trace' do
 
   if match = valid_container_number_regex.match(query)
     container_number = match[0]
+    if container_number.length != query.length
+      container_number = nil
+    end
   end
   return twiml_response settings.invalid_container_number_message unless container_number
 
